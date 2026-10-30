@@ -8,33 +8,37 @@ Klasik AMX Mod X / CS:GO (`amx_hook.sma`) Hook, Grab ve Rope mekaniğinin **Coun
 
 | Yetki Düğümü | Açıklama |
 | :--- | :--- |
-| `admin.hook` | **Hook** kullanma yetkisi (`+hook`, `-hook`, `hook_toggle`, `!hook`) |
-| `admin.grab` | **Grab** kullanma yetkisi (`+grab`, `-grab`, `grab_toggle`, `!grab`, `+push`, `+pull`) |
-| `admin.rope` | **Rope** kullanma yetkisi (`+rope`, `-rope`, `rope_toggle`, `!rope`) |
-| `admin.hgr` *(veya `admin.root`)* | Görsel yönetim menüsü (`!hgrmenu`, `amx_hook_menu`) ve oyunculara yetki verme/alma komutları *(Varsayılan olarak `admin.hook` yetkisi olanlar da menüyü kullanabilir)* |
+| `admin.hook` | **Hook** kullanma yetkisi (`hook1`, `hook0`, `hook_toggle`, `!hook`) |
+| `admin.grab` | **Grab** kullanma yetkisi (`grab1`, `grab0`, `grab_toggle`, `!grab`, `push1`/`push0`, `pull1`/`pull0`) |
+| `admin.rope` | **Rope** kullanma yetkisi (`rope1`, `rope0`, `rope_toggle`, `!rope`) |
+| `admin.hgr` *(veya `admin.root`)* | Görsel yönetim menüsü (`sw_hookmenu`, `!hookmenu`) ve oyunculara yetki verme/alma komutları *(Varsayılan olarak `admin.hook` yetkisi olanlar da menüyü kullanabilir)* |
 
 ---
 
 ## Oyuncu Tuş Atamaları (Konsol Bind)
 
-Oyuncular geliştirici konsoluna (`~`) aşağıdaki komutları yazarak tuş ataması yapabilir:
+CS2 istemcisi `+` ile başlayan özel konsol komutlarını doğrudan sunucuya iletmediği için komutlar **`hook1` / `hook0`**, **`grab1` / `grab0`** ve **`rope1` / `rope0`** şeklinde çalışır.
+
+Oyuncular geliştirici konsoluna (`~`) aşağıdaki satırları yapıştırarak **basılı tutmalı** tuş ataması yapabilir:
 
 ```text
-bind v +hook
-bind c +grab
-bind x +rope
+alias +hook "hook1"; alias -hook "hook0"; bind v +hook
+alias +grab "grab1"; alias -grab "grab0"; bind c +grab
+alias +rope "rope1"; alias -rope "rope0"; bind x +rope
 ```
 
+*(Veya bas-aç / bas-kapat için doğrudan `bind v hook_toggle`, `bind c grab_toggle`, `bind x rope_toggle` kullanılabilir.)*
+
 ### Kontroller ve Fizik Detayları
-1. **Hook (`+hook` - Mavi Lazer):**
-   - Basılı tutulduğu sürece oyuncunun yerçekimini sıfırlar ve baktığı noktaya doğru `hook_speed * 120` hızıyla çeker.
+1. **Hook (`hook1` / `hook0` - Mavi Lazer):**
+   - Aktif olduğu sürece oyuncunun yerçekimini sıfırlar ve baktığı noktaya doğru `hook_speed * 120` hızıyla çeker.
    - `Space` ile yukarı ivme, `Ctrl` ile frenleme/yavaşlama yapılabilir.
-2. **Grab (`+grab` - Kırmızı Lazer):**
+2. **Grab (`grab1` / `grab0` - Kırmızı Lazer):**
    - Baktığınız canlı oyuncuyu veya fiziksel nesneyi (silah, prop, C4 vb.) havada tutar ve bakış yönünüzle birlikte taşır.
-   - **Sol Tık (`Mouse1`)** veya `+push`: Hedefi ileri iter.
-   - **Sağ Tık (`Mouse2`)** veya `+pull`: Hedefi kendine çeker.
+   - **Sol Tık (`Mouse1`)** veya `push1` / `push0`: Hedefi ileri iter.
+   - **Sağ Tık (`Mouse2`)** veya `pull1` / `pull0`: Hedefi kendine çeker.
    - **`R` Tuşu**: Yakalanan hedefi baktığınız yöne doğru fırlatır.
-3. **Rope (`+rope` - Yeşil Lazer):**
+3. **Rope (`rope1` / `rope0` - Yeşil Lazer):**
    - Baktığınız noktaya halat atar ve gerçek sarkaç (pendulum) fiziğiyle sallanmanızı sağlar.
    - **`Space`**: Halata tırmanır (halat boyunu kısaltır).
    - **`Ctrl`**: Halattan aşağı iner (halat boyunu uzatır).
@@ -45,9 +49,9 @@ bind x +rope
 ## Komutlar
 
 ### Oyuncu Komutları
-- `+hook` / `-hook` / `hook_toggle` / `!hook`
-- `+grab` / `-grab` / `grab_toggle` / `!grab` / `+push` / `+pull`
-- `+rope` / `-rope` / `rope_toggle` / `!rope`
+- `hook1` (Aç) / `hook0` (Kapat) / `hook_toggle` / `!hook`
+- `grab1` (Aç) / `grab0` (Kapat) / `grab_toggle` / `!grab` / `push1`/`push0` / `pull1`/`pull0`
+- `rope1` (Aç) / `rope0` (Kapat) / `rope_toggle` / `!rope`
 - `!hgr` — Oyuncunun mevcut Hook/Grab/Rope yetki durumunu gösterir (yetkiliyse yönetim menüsünü açar).
 
 ### Admin Komutları (`amx_hook.sma` Uyumlu + Kısayollar)

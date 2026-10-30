@@ -12,9 +12,12 @@ public static class DefaultConfigTemplate
         # ==============================================================================
         #
         # KULLANIM (Konsol Tuş Atamaları - Bind):
-        #   bind <tuş> +hook      -> Basılı tutarken baktığınız noktaya çeker (Mavi Lazer)
-        #   bind <tuş> +grab      -> Basılı tutarken baktığınız oyuncuyu/nesneyi tutar (Kırmızı Lazer)
-        #   bind <tuş> +rope      -> Basılı tutarken baktığınız noktadan halatla sallanır (Yeşil Lazer)
+        #   CS2'de + ile başlayan özel komutlar istemci tarafından engellendiği için
+        #   komutlar hook1/hook0, grab1/grab0 ve rope1/rope0 olarak çalışır:
+        #
+        #   alias +hook "hook1"; alias -hook "hook0"; bind <tuş> +hook
+        #   alias +grab "grab1"; alias -grab "grab0"; bind <tuş> +grab
+        #   alias +rope "rope1"; alias -rope "rope0"; bind <tuş> +rope
         #
         #   Alternatif Aç/Kapat Komutları:
         #   hook_toggle (!hook) | grab_toggle (!grab) | rope_toggle (!rope)

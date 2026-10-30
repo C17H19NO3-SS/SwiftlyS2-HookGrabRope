@@ -164,34 +164,42 @@ public sealed class Plugin(ISwiftlyCore core) : BasePlugin(core)
     }
 
     // ==============================================================================
-    // KOMUT KAYITLARI (+hook/-hook, +grab/-grab, +rope/-rope, give/take, menu)
+    // KOMUT KAYITLARI (hook1/hook0, grab1/grab0, rope1/rope0, give/take, sw_hookmenu)
     // ==============================================================================
 
     private void RegisterCommands()
     {
-        // 1. İstemci konsolundan gelen ham +hook / -hook / +grab / -grab / +rope / -rope yakalayıcısı
+        // 1. İstemci konsolundan gelen komut yakalayıcısı (hook1/hook0, grab1/grab0, rope1/rope0 vb.)
         _clientCommandHookGuid = Core.Command.HookClientCommand(OnClientCommandHook);
 
-        // 2. Doğrudan konsol (+hook/-hook vb.) ve toggle komutları
-        AddCmd("+hook", OnHookOnCmd, registerRaw: true, help: "Use: bind <key> +hook");
-        AddCmd("-hook", OnHookOffCmd, registerRaw: true, help: "Stops active hook");
+        // 2. Hook komutları (hook1 = Aç, hook0 = Kapat, hook = Aç/Kapat veya hook 1 / hook 0)
+        AddCmd("hook1", OnHookOnCmd, registerRaw: true, help: "Starts hook (Use: alias +hook hook1; alias -hook hook0; bind <key> +hook)");
+        AddCmd("hook0", OnHookOffCmd, registerRaw: true, help: "Stops active hook");
+        AddCmd("hook1", OnHookOnCmd, registerRaw: false, help: "Starts hook (sw_hook1 / !hook1)");
+        AddCmd("hook0", OnHookOffCmd, registerRaw: false, help: "Stops active hook (sw_hook0 / !hook0)");
         AddCmd("hook_toggle", OnHookToggleCmd, registerRaw: true, help: "Toggles your hook on and off");
-        AddCmd("hook", OnHookToggleCmd, registerRaw: false, help: "Toggles your hook on and off (!hook)");
+        AddCmd("hook", OnHookToggleCmd, registerRaw: false, help: "Toggles your hook on and off (!hook / sw_hook [0|1])");
 
-        AddCmd("+grab", OnGrabOnCmd, registerRaw: true, help: "Use: bind <key> +grab");
-        AddCmd("-grab", OnGrabOffCmd, registerRaw: true, help: "Releases grabbed target");
+        // 3. Grab komutları (grab1 = Aç, grab0 = Kapat, grab = Aç/Kapat veya grab 1 / grab 0)
+        AddCmd("grab1", OnGrabOnCmd, registerRaw: true, help: "Starts grab (Use: alias +grab grab1; alias -grab grab0; bind <key> +grab)");
+        AddCmd("grab0", OnGrabOffCmd, registerRaw: true, help: "Releases grabbed target");
+        AddCmd("grab1", OnGrabOnCmd, registerRaw: false, help: "Starts grab (sw_grab1 / !grab1)");
+        AddCmd("grab0", OnGrabOffCmd, registerRaw: false, help: "Releases grabbed target (sw_grab0 / !grab0)");
         AddCmd("grab_toggle", OnGrabToggleCmd, registerRaw: true, help: "Toggles your grab on and off");
-        AddCmd("grab", OnGrabToggleCmd, registerRaw: false, help: "Toggles your grab on and off (!grab)");
+        AddCmd("grab", OnGrabToggleCmd, registerRaw: false, help: "Toggles your grab on and off (!grab / sw_grab [0|1])");
 
-        AddCmd("+push", OnPushOnCmd, registerRaw: true, help: "Pushes grabbed target away");
-        AddCmd("-push", OnPushOffCmd, registerRaw: true, help: "Stops pushing grabbed target");
-        AddCmd("+pull", OnPullOnCmd, registerRaw: true, help: "Pulls grabbed target closer");
-        AddCmd("-pull", OnPullOffCmd, registerRaw: true, help: "Stops pulling grabbed target");
+        AddCmd("push1", OnPushOnCmd, registerRaw: true, help: "Pushes grabbed target away");
+        AddCmd("push0", OnPushOffCmd, registerRaw: true, help: "Stops pushing grabbed target");
+        AddCmd("pull1", OnPullOnCmd, registerRaw: true, help: "Pulls grabbed target closer");
+        AddCmd("pull0", OnPullOffCmd, registerRaw: true, help: "Stops pulling grabbed target");
 
-        AddCmd("+rope", OnRopeOnCmd, registerRaw: true, help: "Use: bind <key> +rope");
-        AddCmd("-rope", OnRopeOffCmd, registerRaw: true, help: "Releases active rope");
+        // 4. Rope komutları (rope1 = Aç, rope0 = Kapat, rope = Aç/Kapat veya rope 1 / rope 0)
+        AddCmd("rope1", OnRopeOnCmd, registerRaw: true, help: "Starts rope (Use: alias +rope rope1; alias -rope rope0; bind <key> +rope)");
+        AddCmd("rope0", OnRopeOffCmd, registerRaw: true, help: "Releases active rope");
+        AddCmd("rope1", OnRopeOnCmd, registerRaw: false, help: "Starts rope (sw_rope1 / !rope1)");
+        AddCmd("rope0", OnRopeOffCmd, registerRaw: false, help: "Releases active rope (sw_rope0 / !rope0)");
         AddCmd("rope_toggle", OnRopeToggleCmd, registerRaw: true, help: "Toggles your rope on and off");
-        AddCmd("rope", OnRopeToggleCmd, registerRaw: false, help: "Toggles your rope on and off (!rope)");
+        AddCmd("rope", OnRopeToggleCmd, registerRaw: false, help: "Toggles your rope on and off (!rope / sw_rope [0|1])");
 
         // 3. amx_hook.sma uyumlu Give / Take komutları + Grab ve Rope karşılıkları
         AddCmd("amx_give_hook", ctx => HandleGiveTakeCommand(ctx, HgrAbility.Hook, grant: true), registerRaw: true,
@@ -268,8 +276,8 @@ public sealed class Plugin(ISwiftlyCore core) : BasePlugin(core)
     }
 
     /// <summary>
-    /// Oyuncularin konsola 'bind <tus> +hook' / '+grab' / '+rope' atadiginda gonderilen
-    /// + ve - komutlarini yakalar ve 'Unknown command' uyarisini engeller.
+    /// Oyuncularin konsola 'hook1'/'hook0', 'grab1'/'grab0', 'rope1'/'rope0' (veya +hook/-hook)
+    /// atadiginda gonderilen komutlari yakalar.
     /// </summary>
     private HookResult OnClientCommandHook(int playerId, string commandLine)
     {
@@ -286,14 +294,18 @@ public sealed class Plugin(ISwiftlyCore core) : BasePlugin(core)
 
         switch (cmdToken.ToLowerInvariant())
         {
+            case "hook1":
+            case "sw_hook1":
             case "+hook":
             case "sw_+hook":
-                _engine.StartHook(player!);
+                if (CanExecuteOnOffNow(player!.Slot)) _engine.StartHook(player!);
                 return HookResult.Handled;
 
+            case "hook0":
+            case "sw_hook0":
             case "-hook":
             case "sw_-hook":
-                _engine.StopHook(player!);
+                if (CanExecuteOnOffNow(player!.Slot)) _engine.StopHook(player!);
                 return HookResult.Handled;
 
             case "hook_toggle":
@@ -301,14 +313,18 @@ public sealed class Plugin(ISwiftlyCore core) : BasePlugin(core)
                 if (CanToggleNow(player!.Slot)) _engine.ToggleHook(player!);
                 return HookResult.Handled;
 
+            case "grab1":
+            case "sw_grab1":
             case "+grab":
             case "sw_+grab":
-                _engine.StartGrab(player!);
+                if (CanExecuteOnOffNow(player!.Slot)) _engine.StartGrab(player!);
                 return HookResult.Handled;
 
+            case "grab0":
+            case "sw_grab0":
             case "-grab":
             case "sw_-grab":
-                _engine.StopGrab(player!);
+                if (CanExecuteOnOffNow(player!.Slot)) _engine.StopGrab(player!);
                 return HookResult.Handled;
 
             case "grab_toggle":
@@ -316,34 +332,46 @@ public sealed class Plugin(ISwiftlyCore core) : BasePlugin(core)
                 if (CanToggleNow(player!.Slot)) _engine.ToggleGrab(player!);
                 return HookResult.Handled;
 
+            case "push1":
+            case "sw_push1":
             case "+push":
             case "sw_+push":
                 _engine.SetPushState(player!, true);
                 return HookResult.Handled;
 
+            case "push0":
+            case "sw_push0":
             case "-push":
             case "sw_-push":
                 _engine.SetPushState(player!, false);
                 return HookResult.Handled;
 
+            case "pull1":
+            case "sw_pull1":
             case "+pull":
             case "sw_+pull":
                 _engine.SetPullState(player!, true);
                 return HookResult.Handled;
 
+            case "pull0":
+            case "sw_pull0":
             case "-pull":
             case "sw_-pull":
                 _engine.SetPullState(player!, false);
                 return HookResult.Handled;
 
+            case "rope1":
+            case "sw_rope1":
             case "+rope":
             case "sw_+rope":
-                _engine.StartRope(player!);
+                if (CanExecuteOnOffNow(player!.Slot)) _engine.StartRope(player!);
                 return HookResult.Handled;
 
+            case "rope0":
+            case "sw_rope0":
             case "-rope":
             case "sw_-rope":
-                _engine.StopRope(player!);
+                if (CanExecuteOnOffNow(player!.Slot)) _engine.StopRope(player!);
                 return HookResult.Handled;
 
             case "rope_toggle":
@@ -354,6 +382,17 @@ public sealed class Plugin(ISwiftlyCore core) : BasePlugin(core)
             default:
                 return HookResult.Continue;
         }
+    }
+
+    private bool CanExecuteOnOffNow(int slot)
+    {
+        if (_engine == null) return false;
+        var st = _engine.GetOrCreateState(slot);
+        float now = Core.Engine.GlobalVars.CurrentTime;
+        if (now - st.LastCommandToggleTime < 0.01f)
+            return false;
+        st.LastCommandToggleTime = now;
+        return true;
     }
 
     private bool CanToggleNow(int slot)
@@ -369,32 +408,44 @@ public sealed class Plugin(ISwiftlyCore core) : BasePlugin(core)
 
     private void OnHookOnCmd(ICommandContext ctx)
     {
-        if (ctx.Sender is { } p) _engine?.StartHook(p);
+        if (ctx.Sender is { } p && CanExecuteOnOffNow(p.Slot)) _engine?.StartHook(p);
     }
 
     private void OnHookOffCmd(ICommandContext ctx)
     {
-        if (ctx.Sender is { } p) _engine?.StopHook(p);
+        if (ctx.Sender is { } p && CanExecuteOnOffNow(p.Slot)) _engine?.StopHook(p);
     }
 
     private void OnHookToggleCmd(ICommandContext ctx)
     {
-        if (ctx.Sender is { } p && CanToggleNow(p.Slot)) _engine?.ToggleHook(p);
+        if (ctx.Sender is not { } p) return;
+        if (ctx.Args.Length > 0)
+        {
+            if (ctx.Args[0] == "1") { _engine?.StartHook(p); return; }
+            if (ctx.Args[0] == "0") { _engine?.StopHook(p); return; }
+        }
+        if (CanToggleNow(p.Slot)) _engine?.ToggleHook(p);
     }
 
     private void OnGrabOnCmd(ICommandContext ctx)
     {
-        if (ctx.Sender is { } p) _engine?.StartGrab(p);
+        if (ctx.Sender is { } p && CanExecuteOnOffNow(p.Slot)) _engine?.StartGrab(p);
     }
 
     private void OnGrabOffCmd(ICommandContext ctx)
     {
-        if (ctx.Sender is { } p) _engine?.StopGrab(p);
+        if (ctx.Sender is { } p && CanExecuteOnOffNow(p.Slot)) _engine?.StopGrab(p);
     }
 
     private void OnGrabToggleCmd(ICommandContext ctx)
     {
-        if (ctx.Sender is { } p && CanToggleNow(p.Slot)) _engine?.ToggleGrab(p);
+        if (ctx.Sender is not { } p) return;
+        if (ctx.Args.Length > 0)
+        {
+            if (ctx.Args[0] == "1") { _engine?.StartGrab(p); return; }
+            if (ctx.Args[0] == "0") { _engine?.StopGrab(p); return; }
+        }
+        if (CanToggleNow(p.Slot)) _engine?.ToggleGrab(p);
     }
 
     private void OnPushOnCmd(ICommandContext ctx)
@@ -419,17 +470,23 @@ public sealed class Plugin(ISwiftlyCore core) : BasePlugin(core)
 
     private void OnRopeOnCmd(ICommandContext ctx)
     {
-        if (ctx.Sender is { } p) _engine?.StartRope(p);
+        if (ctx.Sender is { } p && CanExecuteOnOffNow(p.Slot)) _engine?.StartRope(p);
     }
 
     private void OnRopeOffCmd(ICommandContext ctx)
     {
-        if (ctx.Sender is { } p) _engine?.StopRope(p);
+        if (ctx.Sender is { } p && CanExecuteOnOffNow(p.Slot)) _engine?.StopRope(p);
     }
 
     private void OnRopeToggleCmd(ICommandContext ctx)
     {
-        if (ctx.Sender is { } p && CanToggleNow(p.Slot)) _engine?.ToggleRope(p);
+        if (ctx.Sender is not { } p) return;
+        if (ctx.Args.Length > 0)
+        {
+            if (ctx.Args[0] == "1") { _engine?.StartRope(p); return; }
+            if (ctx.Args[0] == "0") { _engine?.StopRope(p); return; }
+        }
+        if (CanToggleNow(p.Slot)) _engine?.ToggleRope(p);
     }
 
     /// <summary>
@@ -477,10 +534,10 @@ public sealed class Plugin(ISwiftlyCore core) : BasePlugin(core)
 
         string bindHint = ability switch
         {
-            HgrAbility.Hook => "bind <tuş> +hook",
-            HgrAbility.Grab => "bind <tuş> +grab",
-            HgrAbility.Rope => "bind <tuş> +rope",
-            _ => "bind <tuş> +hook / +grab / +rope"
+            HgrAbility.Hook => "alias +hook \"hook1\"; alias -hook \"hook0\"; bind <tuş> +hook",
+            HgrAbility.Grab => "alias +grab \"grab1\"; alias -grab \"grab0\"; bind <tuş> +grab",
+            HgrAbility.Rope => "alias +rope \"rope1\"; alias -rope \"rope0\"; bind <tuş> +rope",
+            _ => "hook1/hook0 | grab1/grab0 | rope1/rope0"
         };
 
         bool alreadyHas = _permissions.HasGrantedAbility(target, ability);
@@ -560,7 +617,7 @@ public sealed class Plugin(ISwiftlyCore core) : BasePlugin(core)
         PlayerUtil.SendChat(player, _config.General.ChatPrefix,
             $"Yetkileriniz -> Hook: {(h ? "[lime]AÇIK" : "[red]KAPALI")}[default] | Grab: {(g ? "[lime]AÇIK" : "[red]KAPALI")}[default] | Rope: {(r ? "[lime]AÇIK" : "[red]KAPALI")}[default]");
         PlayerUtil.SendChat(player, _config.General.ChatPrefix,
-            "Konsol tuş ataması: [yellow]bind <tuş> +hook[default] | [yellow]bind <tuş> +grab[default] | [yellow]bind <tuş> +rope");
+            "Komutlar: [yellow]hook1 / hook0[default] | [yellow]grab1 / grab0[default] | [yellow]rope1 / rope0[default] (Basılı tutma: [lime]alias +hook \"hook1\"; alias -hook \"hook0\"; bind <tuş> +hook[default])");
     }
 
     private void OnReloadCommand(ICommandContext ctx)

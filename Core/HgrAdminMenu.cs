@@ -400,20 +400,20 @@ public sealed class HgrAdminMenu
             Subtitle = "A/D veya E ile yetki verin / geri alın",
             Rows =
             {
-                new Row("Hook Yetkisi (bind key +hook)", grantedHook ? "VERİLDİ" : "YOK",
+                new Row("Hook Yetkisi (hook1 / hook0)", grantedHook ? "VERİLDİ" : "YOK",
                     Arrows: true,
                     Style: grantedHook ? RowStyle.On : RowStyle.Off,
-                    OnAdjust: (a, _) => TogglePlayerAbility(a, target!, HgrAbility.Hook, "Hook", "+hook")),
+                    OnAdjust: (a, _) => TogglePlayerAbility(a, target!, HgrAbility.Hook, "Hook", "hook1 / hook0")),
 
-                new Row("Grab Yetkisi (bind key +grab)", grantedGrab ? "VERİLDİ" : "YOK",
+                new Row("Grab Yetkisi (grab1 / grab0)", grantedGrab ? "VERİLDİ" : "YOK",
                     Arrows: true,
                     Style: grantedGrab ? RowStyle.On : RowStyle.Off,
-                    OnAdjust: (a, _) => TogglePlayerAbility(a, target!, HgrAbility.Grab, "Grab", "+grab")),
+                    OnAdjust: (a, _) => TogglePlayerAbility(a, target!, HgrAbility.Grab, "Grab", "grab1 / grab0")),
 
-                new Row("Rope Yetkisi (bind key +rope)", grantedRope ? "VERİLDİ" : "YOK",
+                new Row("Rope Yetkisi (rope1 / rope0)", grantedRope ? "VERİLDİ" : "YOK",
                     Arrows: true,
                     Style: grantedRope ? RowStyle.On : RowStyle.Off,
-                    OnAdjust: (a, _) => TogglePlayerAbility(a, target!, HgrAbility.Rope, "Rope", "+rope")),
+                    OnAdjust: (a, _) => TogglePlayerAbility(a, target!, HgrAbility.Rope, "Rope", "rope1 / rope0")),
 
                 new Row("✨ Tümünü Ver (Hook + Grab + Rope)", Style: RowStyle.Accent,
                     OnSelect: a =>
@@ -421,7 +421,7 @@ public sealed class HgrAdminMenu
                         _permissions.SetGrantedAbility(target!, HgrAbility.All, true, saveToConfig: true);
                         SaveAndSync();
                         PlayerUtil.SendChat(a, _config.General.ChatPrefix, $"[lime]{name}[default] oyuncusuna tüm HGR yetkileri verildi.");
-                        PlayerUtil.SendChat(target, _config.General.ChatPrefix, "[lime]Bir admin size Hook, Grab ve Rope yetkisi verdi! ([yellow]+hook / +grab / +rope[lime])");
+                        PlayerUtil.SendChat(target, _config.General.ChatPrefix, "[lime]Bir admin size Hook, Grab ve Rope yetkisi verdi! ([yellow]hook1/hook0 | grab1/grab0 | rope1/rope0[lime])");
                     }),
 
                 new Row("🚫 Tümünü Geri Al", Style: RowStyle.Danger,
@@ -508,7 +508,7 @@ public sealed class HgrAdminMenu
         if (_config.Hook.EnabledForAll)
         {
             PlayerUtil.BroadcastChat(_core, _config.General.ChatPrefix,
-                "[lime]Admin tüm oyuncular için Hook kullanımını açtı! Konsola: [yellow]bind <tuş> +hook");
+                "[lime]Admin tüm oyuncular için Hook kullanımını açtı! Konsola: [yellow]alias +hook \"hook1\"; alias -hook \"hook0\"; bind <tuş> +hook");
         }
         else
         {
@@ -525,7 +525,7 @@ public sealed class HgrAdminMenu
         if (_config.Grab.EnabledForAll)
         {
             PlayerUtil.BroadcastChat(_core, _config.General.ChatPrefix,
-                "[lime]Admin tüm oyuncular için Grab kullanımını açtı! Konsola: [yellow]bind <tuş> +grab");
+                "[lime]Admin tüm oyuncular için Grab kullanımını açtı! Konsola: [yellow]alias +grab \"grab1\"; alias -grab \"grab0\"; bind <tuş> +grab");
         }
         else
         {
@@ -542,7 +542,7 @@ public sealed class HgrAdminMenu
         if (_config.Rope.EnabledForAll)
         {
             PlayerUtil.BroadcastChat(_core, _config.General.ChatPrefix,
-                "[lime]Admin tüm oyuncular için Rope kullanımını açtı! Konsola: [yellow]bind <tuş> +rope");
+                "[lime]Admin tüm oyuncular için Rope kullanımını açtı! Konsola: [yellow]alias +rope \"rope1\"; alias -rope \"rope0\"; bind <tuş> +rope");
         }
         else
         {
@@ -578,7 +578,7 @@ public sealed class HgrAdminMenu
             PlayerUtil.SendChat(admin, _config.General.ChatPrefix,
                 $"[lime]{PlayerUtil.GetName(target)}[default] oyuncusuna [gold]{label}[default] yetkisi verildi.");
             PlayerUtil.SendChat(target, _config.General.ChatPrefix,
-                $"[lime]Bir admin size {label} yetkisi verdi! Konsola: [yellow]bind <tuş> {bindCmd}");
+                $"[lime]Bir admin size {label} yetkisi verdi! Konsol komutları: [yellow]{bindCmd}");
         }
         else
         {
