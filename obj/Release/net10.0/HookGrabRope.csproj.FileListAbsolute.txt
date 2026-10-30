@@ -1,0 +1,10 @@
+c:\ws\SwiftlyS2-HookGrabRope\obj\Release\net10.0\HookGrabRope.csproj.AssemblyReference.cache
+c:\ws\SwiftlyS2-HookGrabRope\obj\Release\net10.0\HookGrabRope.GeneratedMSBuildEditorConfig.editorconfig
+c:\ws\SwiftlyS2-HookGrabRope\obj\Release\net10.0\HookGrabRope.csproj.CoreCompileInputs.cache
+c:\ws\SwiftlyS2-HookGrabRope\bin\Release\net10.0\HookGrabRope.deps.json
+c:\ws\SwiftlyS2-HookGrabRope\bin\Release\net10.0\HookGrabRope.dll
+c:\ws\SwiftlyS2-HookGrabRope\bin\Release\net10.0\HookGrabRope.pdb
+c:\ws\SwiftlyS2-HookGrabRope\obj\Release\net10.0\HookGrabRope.dll
+c:\ws\SwiftlyS2-HookGrabRope\obj\Release\net10.0\refint\HookGrabRope.dll
+c:\ws\SwiftlyS2-HookGrabRope\obj\Release\net10.0\HookGrabRope.pdb
+c:\ws\SwiftlyS2-HookGrabRope\obj\Release\net10.0\ref\HookGrabRope.dll

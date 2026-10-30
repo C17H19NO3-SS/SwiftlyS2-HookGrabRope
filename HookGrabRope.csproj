@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AssemblyName>HookGrabRope</AssemblyName>
+    <RootNamespace>HookGrabRope</RootNamespace>
+    <NoWarn>$(NoWarn);NU1902</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Tomlyn" Version="0.17.0" />
+    <PackageReference Include="SwiftlyS2.CS2" Version="1.5.0" ExcludeAssets="runtime" Condition="!Exists('..\libs\SwiftlyS2.Shared.dll')" />
+  </ItemGroup>
+
+  <ItemGroup Condition="Exists('..\libs\SwiftlyS2.Shared.dll')">
+    <Reference Include="SwiftlyS2.Core">
+      <HintPath>..\libs\SwiftlyS2.Core.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="SwiftlyS2.Shared">
+      <HintPath>..\libs\SwiftlyS2.Shared.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!--
+    Yerel CS2 sunucusu mevcutsa build sonrasi dogrudan sunucu eklenti klasorune kopyalar.
+  -->
+  <PropertyGroup>
+    <LocalServerPluginDir>C:\Users\CanDaysa\Desktop\Works\CS2\Sunucu\game\csgo\addons\swiftlys2\plugins\HookGrabRope</LocalServerPluginDir>
+  </PropertyGroup>
+  <Target Name="DeployToLocalServer" AfterTargets="Build" Condition="Exists('$(LocalServerPluginDir)')">
+    <ItemGroup>
+      <DeployFiles Include="$(OutputPath)$(AssemblyName).dll;$(OutputPath)$(AssemblyName).pdb;$(OutputPath)$(AssemblyName).deps.json;$(OutputPath)Tomlyn.dll" Condition="Exists('%(Identity)')" />
+    </ItemGroup>
+    <Copy SourceFiles="@(DeployFiles)" DestinationFolder="$(LocalServerPluginDir)" SkipUnchangedFiles="false" />
+    <Message Importance="high" Text="HookGrabRope -&gt; $(LocalServerPluginDir) (yerel test sunucusu) kopyalandi." />
+  </Target>
+
+</Project>
