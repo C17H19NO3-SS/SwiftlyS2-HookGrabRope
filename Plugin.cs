@@ -15,7 +15,7 @@ using SwiftlyS2.Shared.Plugins;
 namespace HookGrabRope;
 
 [PluginMetadata(
-    Id = "hookgrabrope",
+    Id = "HookGrabRope",
     Version = "1.0.0",
     Name = "HookGrabRope (HGR)",
     Author = "SoulSnatcher",
