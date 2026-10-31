@@ -16,12 +16,17 @@ public sealed class PermissionService
     private PluginConfig _config;
     private readonly Dictionary<int, PlayerHgrState> _states;
 
+    private readonly Dictionary<ulong, int> _dbImmunityCache = new();
+    private DateTime _lastImmunitySync = DateTime.MinValue;
+    private readonly object _immunityLock = new();
+
     public PermissionService(ISwiftlyCore core, PluginConfig config, Dictionary<int, PlayerHgrState> states)
     {
         _core = core;
         _config = config;
         _states = states;
         RegisterPermissionHierarchy();
+        SyncImmunityCacheAsync();
     }
 
     public void UpdateConfig(PluginConfig config)
@@ -142,18 +147,150 @@ public sealed class PermissionService
     }
 
     /// <summary>
-    /// amx_hook.sma satir 144 (get_user_flags(target) & ADMIN_LEVEL_Q) karsiligi:
-    /// Hedef oyuncu admin yetkisine sahipse ve dokunulmazlik aciksa true doner.
+    /// Admins tablosundan yöneticilerin Immunity değerlerini asenkron olarak çeker ve önbelleğe alır.
+    /// </summary>
+    public void SyncImmunityCacheAsync()
+    {
+        Task.Run(async () =>
+        {
+            try
+            {
+                System.Data.IDbConnection? conn = null;
+                try { conn = _core.Database.GetConnection("default"); }
+                catch { try { conn = _core.Database.GetConnection("mysql_detailed"); } catch { } }
+
+                if (conn == null) return;
+                using (conn)
+                {
+                    if (conn is System.Data.Common.DbConnection dbConn)
+                        await dbConn.OpenAsync();
+                    else
+                        conn.Open();
+
+                    using var cmd = conn.CreateCommand();
+                    cmd.CommandText = "SELECT SteamId64, Immunity FROM admins";
+
+                    using var reader = cmd is System.Data.Common.DbCommand dbCmd
+                        ? await dbCmd.ExecuteReaderAsync()
+                        : cmd.ExecuteReader();
+
+                    var dict = new Dictionary<ulong, int>();
+                    while (reader.Read())
+                    {
+                        if (!reader.IsDBNull(0) && !reader.IsDBNull(1))
+                        {
+                            ulong sid = Convert.ToUInt64(reader.GetValue(0));
+                            int imm = Convert.ToInt32(reader.GetValue(1));
+                            dict[sid] = imm;
+                        }
+                    }
+
+                    lock (_immunityLock)
+                    {
+                        _dbImmunityCache.Clear();
+                        foreach (var kv in dict) _dbImmunityCache[kv.Key] = kv.Value;
+                        _lastImmunitySync = DateTime.UtcNow;
+                    }
+                }
+            }
+            catch { /* Veritabanı veya admins tablosu yoksa izin bazlı dokunulmazlığa devam et */ }
+        });
+    }
+
+    /// <summary>
+    /// Oyuncunun dokunulmazlık seviyesini hesaplar.
+    /// Kaynaklar: Veritabanı (admins tablosundaki Immunity), immunity.<sayı> yetkisi, admin rolleri.
+    /// </summary>
+    public int GetPlayerImmunity(IPlayer? player)
+    {
+        if (player == null) return int.MaxValue; // Sunucu konsolu (RCON) en yüksek dokunulmazlığa sahip
+        if (!PlayerUtil.IsUsable(player)) return 0;
+
+        ulong sid = PlayerUtil.GetSteamId64(player);
+        if (sid == 0) return 0;
+
+        // 60 saniyede bir veritabanı senkronizasyonu tetikle
+        if ((DateTime.UtcNow - _lastImmunitySync).TotalSeconds > 60)
+        {
+            _lastImmunitySync = DateTime.UtcNow;
+            SyncImmunityCacheAsync();
+        }
+
+        int immunity = 0;
+
+        // 1. Veritabanı önbelleği
+        lock (_immunityLock)
+        {
+            if (_dbImmunityCache.TryGetValue(sid, out var dbImm))
+                immunity = Math.Max(immunity, dbImm);
+        }
+
+        // 2. SwiftlyS2 yetki düğümleri (immunity.100, immunity.50, admin.root, * vb.)
+        try
+        {
+            var perms = _core.Permission.GetPlayerPermissions(sid);
+            if (perms != null)
+            {
+                foreach (var p in perms)
+                {
+                    if (string.Equals(p, "*", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(p, "admin.root", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(p, "admins.*", StringComparison.OrdinalIgnoreCase))
+                    {
+                        immunity = Math.Max(immunity, 100);
+                    }
+                    else if (p.StartsWith("immunity.", StringComparison.OrdinalIgnoreCase) &&
+                             int.TryParse(p.AsSpan("immunity.".Length), out var val))
+                    {
+                        immunity = Math.Max(immunity, val);
+                    }
+                }
+            }
+        }
+        catch { }
+
+        // 3. Varsayılan admin yetki seviyeleri (hiçbir dokunulmazlık belirtilmemişse)
+        if (immunity == 0)
+        {
+            if (HasDirectPermission(player, _config.Permissions.AdminManagePermission))
+                immunity = Math.Max(immunity, 90);
+            else if (HasDirectPermission(player, _config.Permissions.HookPermission) ||
+                     HasDirectPermission(player, _config.Permissions.GrabPermission) ||
+                     HasDirectPermission(player, _config.Permissions.RopePermission))
+                immunity = Math.Max(immunity, 50);
+        }
+
+        return immunity;
+    }
+
+    /// <summary>
+    /// Sadece dokunulmazlığı senden yüksek olan kişilere grab atılamaz.
+    /// Dokunulmazlığı eşit veya daha düşük olanlara (ve diğer adminlere) grab atılabilir.
+    /// </summary>
+    public bool CanGrabTarget(IPlayer? grabber, IPlayer? target, out int grabberImmunity, out int targetImmunity)
+    {
+        grabberImmunity = GetPlayerImmunity(grabber);
+        targetImmunity = GetPlayerImmunity(target);
+
+        if (target == null) return true;
+        if (grabber != null && grabber.Slot == target.Slot) return true;
+
+        if (!_config.Permissions.AdminImmunity)
+            return true;
+
+        // SADECE dokunulmazlığı senden yüksek olan kişilere grab atılamaz
+        if (targetImmunity > grabberImmunity)
+            return false;
+
+        return true;
+    }
+
+    /// <summary>
+    /// Geriye dönük uyumluluk için hedefin dokunulmazlık seviyesini kontrol eder.
     /// </summary>
     public bool HasAdminImmunity(IPlayer? target)
     {
-        if (!_config.Permissions.AdminImmunity || !PlayerUtil.IsUsable(target))
-            return false;
-
-        return HasDirectPermission(target, _config.Permissions.AdminManagePermission) ||
-               HasDirectPermission(target, _config.Permissions.HookPermission) ||
-               HasDirectPermission(target, _config.Permissions.GrabPermission) ||
-               HasDirectPermission(target, _config.Permissions.RopePermission);
+        return GetPlayerImmunity(target) > 0;
     }
 
     /// <summary>

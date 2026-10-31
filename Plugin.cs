@@ -172,11 +172,13 @@ public sealed class Plugin(ISwiftlyCore core) : BasePlugin(core)
         // 1. İstemci konsolundan gelen komut yakalayıcısı (sw_hook1/sw_hook0, hook1/hook0 vb.)
         _clientCommandHookGuid = Core.Command.HookClientCommand(OnClientCommandHook);
 
-        // 2. Hook komutları
-        AddCmd("hook1", OnHookOnCmd, registerRaw: false, help: "Starts hook (sw_hook1 / !hook1)");
-        AddCmd("hook0", OnHookOffCmd, registerRaw: false, help: "Stops active hook (sw_hook0 / !hook0)");
-        AddCmd("hook_toggle", OnHookToggleCmd, registerRaw: false, help: "Toggles your hook on and off (sw_hook_toggle / !hook_toggle)");
-        AddCmd("hook", OnHookToggleCmd, registerRaw: false, help: "Toggles your hook on and off (sw_hook / !hook [0|1])");
+        // 2. Hook komutları (hook1 ve hook0 - raw olarak kaydolarak prefixsiz çalışır)
+        AddCmd("hook1", OnHookOnCmd, registerRaw: true, help: "Starts hook (hook1 / !hook1)");
+        AddCmd("hook0", OnHookOffCmd, registerRaw: true, help: "Stops active hook (hook0 / !hook0)");
+        AddCmd("sw_hook1", OnHookOnCmd, registerRaw: true, help: "Starts hook (sw_hook1)");
+        AddCmd("sw_hook0", OnHookOffCmd, registerRaw: true, help: "Stops active hook (sw_hook0)");
+        AddCmd("hook_toggle", OnHookToggleCmd, registerRaw: true, help: "Toggles your hook on and off (hook_toggle / !hook_toggle)");
+        AddCmd("hook", OnHookToggleCmd, registerRaw: true, help: "Toggles your hook on and off (hook / !hook [0|1])");
 
         // 3. Grab komutları
         AddCmd("grab1", OnGrabOnCmd, registerRaw: false, help: "Starts grab (sw_grab1 / !grab1)");
@@ -496,9 +498,9 @@ public sealed class Plugin(ISwiftlyCore core) : BasePlugin(core)
         }
 
         string targetName = PlayerUtil.GetName(target);
-        if (_permissions.HasAdminImmunity(target) && (sender == null || sender.Slot != target.Slot))
+        if (sender != null && sender.Slot != target.Slot && !_permissions.CanGrabTarget(sender, target, out var sImm, out var tImm))
         {
-            ReplyToContext(ctx, $"[red]Admin {targetName} üzerinde yetki verme/alma işlemi yapılamaz.");
+            ReplyToContext(ctx, $"[red]{targetName}[default] dokunulmazlığı senden yüksek olduğu için yetki verme/alma işlemi yapılamaz. (Hedef: [gold]{tImm}[default], Sen: [green]{sImm}[default])");
             return;
         }
 
@@ -512,10 +514,10 @@ public sealed class Plugin(ISwiftlyCore core) : BasePlugin(core)
 
         string bindHint = ability switch
         {
-            HgrAbility.Hook => "alias +hook \"sw_hook1\"; alias -hook \"sw_hook0\"; bind <tuş> +hook",
+            HgrAbility.Hook => "alias +hook \"hook1\"; alias -hook \"hook0\"; bind <tuş> +hook",
             HgrAbility.Grab => "alias +grab \"sw_grab1\"; alias -grab \"sw_grab0\"; bind <tuş> +grab",
             HgrAbility.Rope => "alias +rope \"sw_rope1\"; alias -rope \"sw_rope0\"; bind <tuş> +rope",
-            _ => "sw_hook1/sw_hook0 | sw_grab1/sw_grab0 | sw_rope1/sw_rope0"
+            _ => "hook1/hook0 | sw_grab1/sw_grab0 | sw_rope1/sw_rope0"
         };
 
         bool alreadyHas = _permissions.HasGrantedAbility(target, ability);

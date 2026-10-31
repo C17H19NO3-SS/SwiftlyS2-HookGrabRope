@@ -17,24 +17,25 @@ Klasik AMX Mod X / CS:GO (`amx_hook.sma`) Hook, Grab ve Rope mekaniğinin **Coun
 
 ## Oyuncu Tuş Atamaları (Konsol Bind)
 
-CS2 istemcisi `+` ile başlayan özel konsol komutlarını doğrudan sunucuya iletmediği için komutlar **`sw_hook1` / `sw_hook0`**, **`sw_grab1` / `sw_grab0`** ve **`sw_rope1` / `sw_rope0`** şeklinde çalışır.
+CS2 istemcisi `+` ile başlayan özel konsol komutlarını doğrudan sunucuya iletmediği için komutlar **`hook1` / `hook0`** (Hook için doğrudan prefixsiz), **`sw_grab1` / `sw_grab0`** ve **`sw_rope1` / `sw_rope0`** şeklinde çalışır.
 
 Oyuncular geliştirici konsoluna (`~`) aşağıdaki satırları yapıştırarak **basılı tutmalı** tuş ataması yapabilir:
 
 ```text
-alias +hook "sw_hook1"; alias -hook "sw_hook0"; bind v +hook
+alias +hook "hook1"; alias -hook "hook0"; bind v +hook
 alias +grab "sw_grab1"; alias -grab "sw_grab0"; bind c +grab
 alias +rope "sw_rope1"; alias -rope "sw_rope0"; bind x +rope
 ```
 
-*(Veya bas-aç / bas-kapat için doğrudan `bind v sw_hook_toggle`, `bind c sw_grab_toggle`, `bind x sw_rope_toggle` kullanılabilir.)*
+*(Veya bas-aç / bas-kapat için doğrudan `bind v hook_toggle`, `bind c sw_grab_toggle`, `bind x sw_rope_toggle` kullanılabilir.)*
 
 ### Kontroller ve Fizik Detayları
-1. **Hook (`sw_hook1` / `sw_hook0` - Mavi Lazer):**
+1. **Hook (`hook1` / `hook0` - Mavi Lazer):**
    - Aktif olduğu sürece oyuncunun yerçekimini sıfırlar ve baktığı noktaya doğru `sw_hook_speed * 120` hızıyla çeker.
    - `Space` ile yukarı ivme, `Ctrl` ile frenleme/yavaşlama yapılabilir.
 2. **Grab (`sw_grab1` / `sw_grab0` - Kırmızı Lazer):**
    - Baktığınız canlı oyuncuyu veya fiziksel nesneyi (silah, prop, C4 vb.) havada tutar ve bakış yönünüzle birlikte taşır.
+   - **Dokunulmazlık Kuralı:** Genel admin dokunulmazlığı kaldırılmıştır; yalnızca dokunulmazlık seviyesi (Immunity) sizden daha yüksek olan oyunculara Grab atılamaz. Eşit veya daha düşük dokunulmazlıktaki oyuncular ve yöneticiler tutulabilir.
    - **Sol Tık (`Mouse1`)** veya `sw_push1` / `sw_push0`: Hedefi ileri iter.
    - **Sağ Tık (`Mouse2`)** veya `sw_pull1` / `sw_pull0`: Hedefi kendine çeker.
    - **`R` Tuşu**: Yakalanan hedefi baktığınız yöne doğru fırlatır.
@@ -49,7 +50,7 @@ alias +rope "sw_rope1"; alias -rope "sw_rope0"; bind x +rope
 ## Komutlar
 
 ### Oyuncu Komutları
-- `sw_hook1` (Aç) / `sw_hook0` (Kapat) / `sw_hook_toggle` / `!hook`
+- `hook1` (Aç) / `hook0` (Kapat) / `hook_toggle` / `!hook` (Alternatif: `sw_hook1` / `sw_hook0`)
 - `sw_grab1` (Aç) / `sw_grab0` (Kapat) / `sw_grab_toggle` / `!grab` / `sw_push1`/`sw_push0` / `sw_pull1`/`sw_pull0`
 - `sw_rope1` (Aç) / `sw_rope0` (Kapat) / `sw_rope_toggle` / `!rope`
 - `sw_hgr` / `!hgr` — Oyuncunun mevcut Hook/Grab/Rope yetki durumunu gösterir (yetkiliyse yönetim menüsünü açar).

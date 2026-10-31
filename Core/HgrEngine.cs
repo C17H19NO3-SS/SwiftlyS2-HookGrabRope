@@ -402,10 +402,10 @@ public sealed class HgrEngine
 
     private bool LockGrabOnPlayer(IPlayer grabber, PlayerHgrState state, IPlayer target, Vector grabberEyePos)
     {
-        if (_permissions.HasAdminImmunity(target) && target.Slot != grabber.Slot)
+        if (target.Slot != grabber.Slot && !_permissions.CanGrabTarget(grabber, target, out var grabberImm, out var targetImm))
         {
             PlayerUtil.SendChat(grabber, _config.General.ChatPrefix,
-                $"[red]{PlayerUtil.GetName(target)}[default] admin dokunulmazlığına sahip olduğu için Grab ile tutulamaz.");
+                $"[red]{PlayerUtil.GetName(target)}[default] dokunulmazlığı senden yüksek olduğu için Grab ile tutulamaz. (Hedef: [gold]{targetImm}[default], Sen: [green]{grabberImm}[default])");
             state.IsGrabbing = false;
             state.IsSearchingGrabTarget = false;
             return false;

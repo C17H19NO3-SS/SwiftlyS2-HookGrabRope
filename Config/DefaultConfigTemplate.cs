@@ -13,14 +13,14 @@ public static class DefaultConfigTemplate
         #
         # KULLANIM (Konsol Tuş Atamaları - Bind):
         #   CS2'de + ile başlayan özel komutlar istemci tarafından engellendiği için
-        #   komutlar sw_hook1/sw_hook0, sw_grab1/sw_grab0 ve sw_rope1/sw_rope0 olarak çalışır:
+        #   Hook komutları hook1/hook0, Grab ve Rope ise sw_grab1/sw_grab0 ve sw_rope1/sw_rope0 olarak çalışır:
         #
-        #   alias +hook "sw_hook1"; alias -hook "sw_hook0"; bind <tuş> +hook
+        #   alias +hook "hook1"; alias -hook "hook0"; bind <tuş> +hook
         #   alias +grab "sw_grab1"; alias -grab "sw_grab0"; bind <tuş> +grab
         #   alias +rope "sw_rope1"; alias -rope "sw_rope0"; bind <tuş> +rope
         #
         #   Alternatif Aç/Kapat Komutları:
-        #   sw_hook_toggle (!hook) | sw_grab_toggle (!grab) | sw_rope_toggle (!rope)
+        #   hook_toggle (!hook) | sw_grab_toggle (!grab) | sw_rope_toggle (!rope)
         #
         # ADMİN KOMUTLARI:
         #   sw_hookmenu / !hookmenu -> Görsel HGR Yönetim Menüsü
@@ -49,7 +49,7 @@ public static class DefaultConfigTemplate
         # true ise admin.hook yetkisine sahip olanlar da menü ve give/take komutlarını kullanabilir:
         allow_hook_admins_to_manage = true
 
-        # true ise adminler başka bir admini Grab ile tutamaz veya yetkisini alamaz:
+        # Dokunulmazlık kontrolü (true ise sadece dokunulmazlığı senden yüksek olan oyunculara Grab atılamaz):
         admin_immunity = true
 
         [hook]

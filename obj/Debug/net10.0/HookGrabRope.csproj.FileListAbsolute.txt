@@ -1,0 +1,4 @@
+c:\ws\SwiftlyS2-HookGrabRope\obj\Debug\net10.0\HookGrabRope.csproj.AssemblyReference.cache
+c:\ws\SwiftlyS2-HookGrabRope\obj\Debug\net10.0\HookGrabRope.GeneratedMSBuildEditorConfig.editorconfig
+c:\ws\SwiftlyS2-HookGrabRope\obj\Debug\net10.0\HookGrabRope.csproj.CoreCompileInputs.cache
+c:\ws\SwiftlyS2-HookGrabRope\obj\Debug\net10.0\HookGrabRope.sourcelink.json

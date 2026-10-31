@@ -400,10 +400,10 @@ public sealed class HgrAdminMenu
             Subtitle = "A/D veya E ile yetki verin / geri alın",
             Rows =
             {
-                new Row("Hook Yetkisi (sw_hook1 / sw_hook0)", grantedHook ? "VERİLDİ" : "YOK",
+                new Row("Hook Yetkisi (hook1 / hook0)", grantedHook ? "VERİLDİ" : "YOK",
                     Arrows: true,
                     Style: grantedHook ? RowStyle.On : RowStyle.Off,
-                    OnAdjust: (a, _) => TogglePlayerAbility(a, target!, HgrAbility.Hook, "Hook", "sw_hook1 / sw_hook0")),
+                    OnAdjust: (a, _) => TogglePlayerAbility(a, target!, HgrAbility.Hook, "Hook", "hook1 / hook0")),
 
                 new Row("Grab Yetkisi (sw_grab1 / sw_grab0)", grantedGrab ? "VERİLDİ" : "YOK",
                     Arrows: true,
@@ -418,16 +418,28 @@ public sealed class HgrAdminMenu
                 new Row("✨ Tümünü Ver (Hook + Grab + Rope)", Style: RowStyle.Accent,
                     OnSelect: a =>
                     {
-                        _permissions.SetGrantedAbility(target!, HgrAbility.All, true, saveToConfig: true);
+                        if (target!.Slot != a.Slot && !_permissions.CanGrabTarget(a, target, out var aImm, out var tImm))
+                        {
+                            PlayerUtil.SendChat(a, _config.General.ChatPrefix,
+                                $"[red]{name}[default] dokunulmazlığı senden yüksek olduğu için yetki verilemez. (Hedef: [gold]{tImm}[default], Sen: [green]{aImm}[default])");
+                            return;
+                        }
+                        _permissions.SetGrantedAbility(target, HgrAbility.All, true, saveToConfig: true);
                         SaveAndSync();
                         PlayerUtil.SendChat(a, _config.General.ChatPrefix, $"[lime]{name}[default] oyuncusuna tüm HGR yetkileri verildi.");
-                        PlayerUtil.SendChat(target, _config.General.ChatPrefix, "[lime]Bir admin size Hook, Grab ve Rope yetkisi verdi! ([yellow]sw_hook1/sw_hook0 | sw_grab1/sw_grab0 | sw_rope1/sw_rope0[lime])");
+                        PlayerUtil.SendChat(target, _config.General.ChatPrefix, "[lime]Bir admin size Hook, Grab ve Rope yetkisi verdi! ([yellow]hook1/hook0 | sw_grab1/sw_grab0 | sw_rope1/sw_rope0[lime])");
                     }),
 
                 new Row("🚫 Tümünü Geri Al", Style: RowStyle.Danger,
                     OnSelect: a =>
                     {
-                        _permissions.SetGrantedAbility(target!, HgrAbility.All, false, saveToConfig: true);
+                        if (target!.Slot != a.Slot && !_permissions.CanGrabTarget(a, target, out var aImm, out var tImm))
+                        {
+                            PlayerUtil.SendChat(a, _config.General.ChatPrefix,
+                                $"[red]{name}[default] dokunulmazlığı senden yüksek olduğu için yetki geri alınamaz. (Hedef: [gold]{tImm}[default], Sen: [green]{aImm}[default])");
+                            return;
+                        }
+                        _permissions.SetGrantedAbility(target, HgrAbility.All, false, saveToConfig: true);
                         _engine.StopAllForPlayer(target);
                         SaveAndSync();
                         PlayerUtil.SendChat(a, _config.General.ChatPrefix, $"[red]{name}[default] oyuncusunun tüm HGR yetkileri alındı.");
@@ -553,10 +565,10 @@ public sealed class HgrAdminMenu
 
     private void TogglePlayerAbility(IPlayer admin, IPlayer target, HgrAbility ability, string label, string bindCmd)
     {
-        if (_permissions.HasAdminImmunity(target) && target.Slot != admin.Slot)
+        if (target.Slot != admin.Slot && !_permissions.CanGrabTarget(admin, target, out var adminImm, out var targetImm))
         {
             PlayerUtil.SendChat(admin, _config.General.ChatPrefix,
-                $"[red]Admin {PlayerUtil.GetName(target)} üzerinde yetki değişikliği yapılamaz.");
+                $"[red]{PlayerUtil.GetName(target)}[default] dokunulmazlığı senden yüksek olduğu için yetki değişikliği yapılamaz. (Hedef: [gold]{targetImm}[default], Sen: [green]{adminImm}[default])");
             return;
         }
 
