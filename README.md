@@ -8,37 +8,37 @@ Klasik AMX Mod X / CS:GO (`amx_hook.sma`) Hook, Grab ve Rope mekaniğinin **Coun
 
 | Yetki Düğümü | Açıklama |
 | :--- | :--- |
-| `admin.hook` | **Hook** kullanma yetkisi (`hook1`, `hook0`, `hook_toggle`, `!hook`) |
-| `admin.grab` | **Grab** kullanma yetkisi (`grab1`, `grab0`, `grab_toggle`, `!grab`, `push1`/`push0`, `pull1`/`pull0`) |
-| `admin.rope` | **Rope** kullanma yetkisi (`rope1`, `rope0`, `rope_toggle`, `!rope`) |
+| `admin.hook` | **Hook** kullanma yetkisi (`sw_hook1`, `sw_hook0`, `sw_hook_toggle`, `!hook`) |
+| `admin.grab` | **Grab** kullanma yetkisi (`sw_grab1`, `sw_grab0`, `sw_grab_toggle`, `!grab`, `sw_push1`/`sw_push0`, `sw_pull1`/`sw_pull0`) |
+| `admin.rope` | **Rope** kullanma yetkisi (`sw_rope1`, `sw_rope0`, `sw_rope_toggle`, `!rope`) |
 | `admin.hgr` *(veya `admin.root`)* | Görsel yönetim menüsü (`sw_hookmenu`, `!hookmenu`) ve oyunculara yetki verme/alma komutları *(Varsayılan olarak `admin.hook` yetkisi olanlar da menüyü kullanabilir)* |
 
 ---
 
 ## Oyuncu Tuş Atamaları (Konsol Bind)
 
-CS2 istemcisi `+` ile başlayan özel konsol komutlarını doğrudan sunucuya iletmediği için komutlar **`hook1` / `hook0`**, **`grab1` / `grab0`** ve **`rope1` / `rope0`** şeklinde çalışır.
+CS2 istemcisi `+` ile başlayan özel konsol komutlarını doğrudan sunucuya iletmediği için komutlar **`sw_hook1` / `sw_hook0`**, **`sw_grab1` / `sw_grab0`** ve **`sw_rope1` / `sw_rope0`** şeklinde çalışır.
 
 Oyuncular geliştirici konsoluna (`~`) aşağıdaki satırları yapıştırarak **basılı tutmalı** tuş ataması yapabilir:
 
 ```text
-alias +hook "hook1"; alias -hook "hook0"; bind v +hook
-alias +grab "grab1"; alias -grab "grab0"; bind c +grab
-alias +rope "rope1"; alias -rope "rope0"; bind x +rope
+alias +hook "sw_hook1"; alias -hook "sw_hook0"; bind v +hook
+alias +grab "sw_grab1"; alias -grab "sw_grab0"; bind c +grab
+alias +rope "sw_rope1"; alias -rope "sw_rope0"; bind x +rope
 ```
 
-*(Veya bas-aç / bas-kapat için doğrudan `bind v hook_toggle`, `bind c grab_toggle`, `bind x rope_toggle` kullanılabilir.)*
+*(Veya bas-aç / bas-kapat için doğrudan `bind v sw_hook_toggle`, `bind c sw_grab_toggle`, `bind x sw_rope_toggle` kullanılabilir.)*
 
 ### Kontroller ve Fizik Detayları
-1. **Hook (`hook1` / `hook0` - Mavi Lazer):**
-   - Aktif olduğu sürece oyuncunun yerçekimini sıfırlar ve baktığı noktaya doğru `hook_speed * 120` hızıyla çeker.
+1. **Hook (`sw_hook1` / `sw_hook0` - Mavi Lazer):**
+   - Aktif olduğu sürece oyuncunun yerçekimini sıfırlar ve baktığı noktaya doğru `sw_hook_speed * 120` hızıyla çeker.
    - `Space` ile yukarı ivme, `Ctrl` ile frenleme/yavaşlama yapılabilir.
-2. **Grab (`grab1` / `grab0` - Kırmızı Lazer):**
+2. **Grab (`sw_grab1` / `sw_grab0` - Kırmızı Lazer):**
    - Baktığınız canlı oyuncuyu veya fiziksel nesneyi (silah, prop, C4 vb.) havada tutar ve bakış yönünüzle birlikte taşır.
-   - **Sol Tık (`Mouse1`)** veya `push1` / `push0`: Hedefi ileri iter.
-   - **Sağ Tık (`Mouse2`)** veya `pull1` / `pull0`: Hedefi kendine çeker.
+   - **Sol Tık (`Mouse1`)** veya `sw_push1` / `sw_push0`: Hedefi ileri iter.
+   - **Sağ Tık (`Mouse2`)** veya `sw_pull1` / `sw_pull0`: Hedefi kendine çeker.
    - **`R` Tuşu**: Yakalanan hedefi baktığınız yöne doğru fırlatır.
-3. **Rope (`rope1` / `rope0` - Yeşil Lazer):**
+3. **Rope (`sw_rope1` / `sw_rope0` - Yeşil Lazer):**
    - Baktığınız noktaya halat atar ve gerçek sarkaç (pendulum) fiziğiyle sallanmanızı sağlar.
    - **`Space`**: Halata tırmanır (halat boyunu kısaltır).
    - **`Ctrl`**: Halattan aşağı iner (halat boyunu uzatır).
@@ -49,30 +49,30 @@ alias +rope "rope1"; alias -rope "rope0"; bind x +rope
 ## Komutlar
 
 ### Oyuncu Komutları
-- `hook1` (Aç) / `hook0` (Kapat) / `hook_toggle` / `!hook`
-- `grab1` (Aç) / `grab0` (Kapat) / `grab_toggle` / `!grab` / `push1`/`push0` / `pull1`/`pull0`
-- `rope1` (Aç) / `rope0` (Kapat) / `rope_toggle` / `!rope`
-- `!hgr` — Oyuncunun mevcut Hook/Grab/Rope yetki durumunu gösterir (yetkiliyse yönetim menüsünü açar).
+- `sw_hook1` (Aç) / `sw_hook0` (Kapat) / `sw_hook_toggle` / `!hook`
+- `sw_grab1` (Aç) / `sw_grab0` (Kapat) / `sw_grab_toggle` / `!grab` / `sw_push1`/`sw_push0` / `sw_pull1`/`sw_pull0`
+- `sw_rope1` (Aç) / `sw_rope0` (Kapat) / `sw_rope_toggle` / `!rope`
+- `sw_hgr` / `!hgr` — Oyuncunun mevcut Hook/Grab/Rope yetki durumunu gösterir (yetkiliyse yönetim menüsünü açar).
 
-### Admin Komutları (`amx_hook.sma` Uyumlu + Kısayollar)
+### Admin Komutları
 - `sw_hookmenu` / `!hookmenu` — Görsel CenterHTML HGR Yönetim Menüsünü açar (`W/S` Gezin, `A/D` Değiştir, `E` Seç, `R` Geri/Kapat).
-- `amx_give_hook <isim|#slot>` / `!givehook <isim>` — Oyuncuya Hook yetkisi verir.
-- `amx_take_hook <isim|#slot>` / `!takehook <isim>` — Oyuncunun Hook yetkisini geri alır.
-- `amx_give_grab <isim|#slot>` / `!givegrab <isim>` — Oyuncuya Grab yetkisi verir.
-- `amx_take_grab <isim|#slot>` / `!takegrab <isim>` — Oyuncunun Grab yetkisini geri alır.
-- `amx_give_rope <isim|#slot>` / `!giverope <isim>` — Oyuncuya Rope yetkisi verir.
-- `amx_take_rope <isim|#slot>` / `!takerope <isim>` — Oyuncunun Rope yetkisini geri alır.
-- `amx_give_hgr <isim|#slot>` / `!hgrver <isim>` — Oyuncuya tüm HGR yetkilerini verir.
-- `amx_take_hgr <isim|#slot>` / `!hgral <isim>` — Oyuncunun tüm HGR yetkilerini geri alır.
-- `!hgrreload` — `hgr_config.toml` yapılandırma dosyasını yeniden yükler.
+- `sw_givehook <isim|#slot>` / `!givehook <isim>` — Oyuncuya Hook yetkisi verir.
+- `sw_takehook <isim|#slot>` / `!takehook <isim>` — Oyuncunun Hook yetkisini geri alır.
+- `sw_givegrab <isim|#slot>` / `!givegrab <isim>` — Oyuncuya Grab yetkisi verir.
+- `sw_takegrab <isim|#slot>` / `!takegrab <isim>` — Oyuncunun Grab yetkisini geri alır.
+- `sw_giverope <isim|#slot>` / `!giverope <isim>` — Oyuncuya Rope yetkisi verir.
+- `sw_takerope <isim|#slot>` / `!takerope <isim>` — Oyuncunun Rope yetkisini geri alır.
+- `sw_givehgr <isim|#slot>` / `!givehgr <isim>` — Oyuncuya tüm HGR yetkilerini verir.
+- `sw_takehgr <isim|#slot>` / `!takehgr <isim>` — Oyuncunun tüm HGR yetkilerini geri alır.
+- `sw_hgrreload` / `!hgrreload` — `hgr_config.toml` yapılandırma dosyasını yeniden yükler.
 
 ---
 
 ## Sunucu ConVar'ları
-- `hook_speed` (Varsayılan: `5.0`)
-- `hook_enabled` (Varsayılan: `0` — `1` yapılırsa tüm oyuncular Hook kullanabilir)
-- `grab_speed` (Varsayılan: `5.0`)
-- `grab_enabled` (Varsayılan: `0` — `1` yapılırsa tüm oyuncular Grab kullanabilir)
-- `rope_speed` (Varsayılan: `5.0`)
-- `rope_enabled` (Varsayılan: `0` — `1` yapılırsa tüm oyuncular Rope kullanabilir)
+- `sw_hook_speed` (Varsayılan: `5.0`)
+- `sw_hook_enabled` (Varsayılan: `0` — `1` yapılırsa tüm oyuncular Hook kullanabilir)
+- `sw_grab_speed` (Varsayılan: `5.0`)
+- `sw_grab_enabled` (Varsayılan: `0` — `1` yapılırsa tüm oyuncular Grab kullanabilir)
+- `sw_rope_speed` (Varsayılan: `5.0`)
+- `sw_rope_enabled` (Varsayılan: `0` — `1` yapılırsa tüm oyuncular Rope kullanabilir)
 

@@ -18,7 +18,7 @@ namespace HookGrabRope;
     Id = "hookgrabrope",
     Version = "1.0.0",
     Name = "HookGrabRope (HGR)",
-    Author = "CanDaysa & Devrim",
+    Author = "SoulSnatcher",
     Description = "CS2 icin SwiftlyS2 tabanli Hook (admin.hook), Grab (admin.grab) ve Rope (admin.rope) eklentisi."
 )]
 public sealed class Plugin(ISwiftlyCore core) : BasePlugin(core)
@@ -100,21 +100,21 @@ public sealed class Plugin(ISwiftlyCore core) : BasePlugin(core)
     }
 
     // ==============================================================================
-    // CONVAR YONETIMI (amx_hook.sma: hook_speed, hook_enabled + grab/rope)
+    // CONVAR YONETIMI (sw_hook_speed, sw_hook_enabled, sw_grab_speed vb.)
     // ==============================================================================
 
     private void InitializeConVars()
     {
         try
         {
-            _cvarHookSpeed = Core.ConVar.Create("hook_speed", "Hook hiz carpani (Varsayilan: 5.0)", _config.Hook.Speed, 0.5f, 30.0f);
-            _cvarHookEnabled = Core.ConVar.Create("hook_enabled", "Herkesin Hook kullanabilmesini acar/kapatir (0/1)", _config.Hook.EnabledForAll);
+            _cvarHookSpeed = Core.ConVar.Create("sw_hook_speed", "Hook hiz carpani (Varsayilan: 5.0)", _config.Hook.Speed, 0.5f, 30.0f);
+            _cvarHookEnabled = Core.ConVar.Create("sw_hook_enabled", "Herkesin Hook kullanabilmesini acar/kapatir (0/1)", _config.Hook.EnabledForAll);
 
-            _cvarGrabSpeed = Core.ConVar.Create("grab_speed", "Grab cekim hizi carpani (Varsayilan: 5.0)", _config.Grab.Speed, 0.5f, 30.0f);
-            _cvarGrabEnabled = Core.ConVar.Create("grab_enabled", "Herkesin Grab kullanabilmesini acar/kapatir (0/1)", _config.Grab.EnabledForAll);
+            _cvarGrabSpeed = Core.ConVar.Create("sw_grab_speed", "Grab cekim hizi carpani (Varsayilan: 5.0)", _config.Grab.Speed, 0.5f, 30.0f);
+            _cvarGrabEnabled = Core.ConVar.Create("sw_grab_enabled", "Herkesin Grab kullanabilmesini acar/kapatir (0/1)", _config.Grab.EnabledForAll);
 
-            _cvarRopeSpeed = Core.ConVar.Create("rope_speed", "Rope sallanma hizi carpani (Varsayilan: 5.0)", _config.Rope.Speed, 0.5f, 30.0f);
-            _cvarRopeEnabled = Core.ConVar.Create("rope_enabled", "Herkesin Rope kullanabilmesini acar/kapatir (0/1)", _config.Rope.EnabledForAll);
+            _cvarRopeSpeed = Core.ConVar.Create("sw_rope_speed", "Rope sallanma hizi carpani (Varsayilan: 5.0)", _config.Rope.Speed, 0.5f, 30.0f);
+            _cvarRopeEnabled = Core.ConVar.Create("sw_rope_enabled", "Herkesin Rope kullanabilmesini acar/kapatir (0/1)", _config.Rope.EnabledForAll);
         }
         catch (Exception ex)
         {
@@ -164,87 +164,65 @@ public sealed class Plugin(ISwiftlyCore core) : BasePlugin(core)
     }
 
     // ==============================================================================
-    // KOMUT KAYITLARI (hook1/hook0, grab1/grab0, rope1/rope0, give/take, sw_hookmenu)
+    // KOMUT KAYITLARI (sw_hook1/sw_hook0, sw_grab1/sw_grab0, sw_rope1/sw_rope0, sw_givehook vb.)
     // ==============================================================================
 
     private void RegisterCommands()
     {
-        // 1. İstemci konsolundan gelen komut yakalayıcısı (hook1/hook0, grab1/grab0, rope1/rope0 vb.)
+        // 1. İstemci konsolundan gelen komut yakalayıcısı (sw_hook1/sw_hook0, hook1/hook0 vb.)
         _clientCommandHookGuid = Core.Command.HookClientCommand(OnClientCommandHook);
 
-        // 2. Hook komutları (hook1 = Aç, hook0 = Kapat, hook = Aç/Kapat veya hook 1 / hook 0)
-        AddCmd("hook1", OnHookOnCmd, registerRaw: true, help: "Starts hook (Use: alias +hook hook1; alias -hook hook0; bind <key> +hook)");
-        AddCmd("hook0", OnHookOffCmd, registerRaw: true, help: "Stops active hook");
+        // 2. Hook komutları
         AddCmd("hook1", OnHookOnCmd, registerRaw: false, help: "Starts hook (sw_hook1 / !hook1)");
         AddCmd("hook0", OnHookOffCmd, registerRaw: false, help: "Stops active hook (sw_hook0 / !hook0)");
-        AddCmd("hook_toggle", OnHookToggleCmd, registerRaw: true, help: "Toggles your hook on and off");
-        AddCmd("hook", OnHookToggleCmd, registerRaw: false, help: "Toggles your hook on and off (!hook / sw_hook [0|1])");
+        AddCmd("hook_toggle", OnHookToggleCmd, registerRaw: false, help: "Toggles your hook on and off (sw_hook_toggle / !hook_toggle)");
+        AddCmd("hook", OnHookToggleCmd, registerRaw: false, help: "Toggles your hook on and off (sw_hook / !hook [0|1])");
 
-        // 3. Grab komutları (grab1 = Aç, grab0 = Kapat, grab = Aç/Kapat veya grab 1 / grab 0)
-        AddCmd("grab1", OnGrabOnCmd, registerRaw: true, help: "Starts grab (Use: alias +grab grab1; alias -grab grab0; bind <key> +grab)");
-        AddCmd("grab0", OnGrabOffCmd, registerRaw: true, help: "Releases grabbed target");
+        // 3. Grab komutları
         AddCmd("grab1", OnGrabOnCmd, registerRaw: false, help: "Starts grab (sw_grab1 / !grab1)");
         AddCmd("grab0", OnGrabOffCmd, registerRaw: false, help: "Releases grabbed target (sw_grab0 / !grab0)");
-        AddCmd("grab_toggle", OnGrabToggleCmd, registerRaw: true, help: "Toggles your grab on and off");
-        AddCmd("grab", OnGrabToggleCmd, registerRaw: false, help: "Toggles your grab on and off (!grab / sw_grab [0|1])");
+        AddCmd("grab_toggle", OnGrabToggleCmd, registerRaw: false, help: "Toggles your grab on and off (sw_grab_toggle / !grab_toggle)");
+        AddCmd("grab", OnGrabToggleCmd, registerRaw: false, help: "Toggles your grab on and off (sw_grab / !grab [0|1])");
 
-        AddCmd("push1", OnPushOnCmd, registerRaw: true, help: "Pushes grabbed target away");
-        AddCmd("push0", OnPushOffCmd, registerRaw: true, help: "Stops pushing grabbed target");
-        AddCmd("pull1", OnPullOnCmd, registerRaw: true, help: "Pulls grabbed target closer");
-        AddCmd("pull0", OnPullOffCmd, registerRaw: true, help: "Stops pulling grabbed target");
+        AddCmd("push1", OnPushOnCmd, registerRaw: false, help: "Pushes grabbed target away (sw_push1 / !push1)");
+        AddCmd("push0", OnPushOffCmd, registerRaw: false, help: "Stops pushing grabbed target (sw_push0 / !push0)");
+        AddCmd("pull1", OnPullOnCmd, registerRaw: false, help: "Pulls grabbed target closer (sw_pull1 / !pull1)");
+        AddCmd("pull0", OnPullOffCmd, registerRaw: false, help: "Stops pulling grabbed target (sw_pull0 / !pull0)");
 
-        // 4. Rope komutları (rope1 = Aç, rope0 = Kapat, rope = Aç/Kapat veya rope 1 / rope 0)
-        AddCmd("rope1", OnRopeOnCmd, registerRaw: true, help: "Starts rope (Use: alias +rope rope1; alias -rope rope0; bind <key> +rope)");
-        AddCmd("rope0", OnRopeOffCmd, registerRaw: true, help: "Releases active rope");
+        // 4. Rope komutları
         AddCmd("rope1", OnRopeOnCmd, registerRaw: false, help: "Starts rope (sw_rope1 / !rope1)");
         AddCmd("rope0", OnRopeOffCmd, registerRaw: false, help: "Releases active rope (sw_rope0 / !rope0)");
-        AddCmd("rope_toggle", OnRopeToggleCmd, registerRaw: true, help: "Toggles your rope on and off");
-        AddCmd("rope", OnRopeToggleCmd, registerRaw: false, help: "Toggles your rope on and off (!rope / sw_rope [0|1])");
+        AddCmd("rope_toggle", OnRopeToggleCmd, registerRaw: false, help: "Toggles your rope on and off (sw_rope_toggle / !rope_toggle)");
+        AddCmd("rope", OnRopeToggleCmd, registerRaw: false, help: "Toggles your rope on and off (sw_rope / !rope [0|1])");
 
-        // 3. amx_hook.sma uyumlu Give / Take komutları + Grab ve Rope karşılıkları
-        AddCmd("amx_give_hook", ctx => HandleGiveTakeCommand(ctx, HgrAbility.Hook, grant: true), registerRaw: true,
-            help: "Give a player the ability to hook <nick|#userid>");
-        AddCmd("amx_take_hook", ctx => HandleGiveTakeCommand(ctx, HgrAbility.Hook, grant: false), registerRaw: true,
-            help: "Take a player's ability to hook <nick|#userid>");
+        // 5. Give / Take komutları (sw_givehook, sw_takehook vb.)
         AddCmd("givehook", ctx => HandleGiveTakeCommand(ctx, HgrAbility.Hook, grant: true), registerRaw: false,
-            help: "Bir oyuncuya Hook yetkisi verir: !givehook <isim>");
+            help: "Bir oyuncuya Hook yetkisi verir: sw_givehook <isim|#slot> / !givehook");
         AddCmd("takehook", ctx => HandleGiveTakeCommand(ctx, HgrAbility.Hook, grant: false), registerRaw: false,
-            help: "Bir oyuncunun Hook yetkisini alır: !takehook <isim>");
+            help: "Bir oyuncunun Hook yetkisini alır: sw_takehook <isim|#slot> / !takehook");
 
-        AddCmd("amx_give_grab", ctx => HandleGiveTakeCommand(ctx, HgrAbility.Grab, grant: true), registerRaw: true,
-            help: "Give a player the ability to grab <nick|#userid>");
-        AddCmd("amx_take_grab", ctx => HandleGiveTakeCommand(ctx, HgrAbility.Grab, grant: false), registerRaw: true,
-            help: "Take a player's ability to grab <nick|#userid>");
         AddCmd("givegrab", ctx => HandleGiveTakeCommand(ctx, HgrAbility.Grab, grant: true), registerRaw: false,
-            help: "Bir oyuncuya Grab yetkisi verir: !givegrab <isim>");
+            help: "Bir oyuncuya Grab yetkisi verir: sw_givegrab <isim|#slot> / !givegrab");
         AddCmd("takegrab", ctx => HandleGiveTakeCommand(ctx, HgrAbility.Grab, grant: false), registerRaw: false,
-            help: "Bir oyuncunun Grab yetkisini alır: !takegrab <isim>");
+            help: "Bir oyuncunun Grab yetkisini alır: sw_takegrab <isim|#slot> / !takegrab");
 
-        AddCmd("amx_give_rope", ctx => HandleGiveTakeCommand(ctx, HgrAbility.Rope, grant: true), registerRaw: true,
-            help: "Give a player the ability to rope <nick|#userid>");
-        AddCmd("amx_take_rope", ctx => HandleGiveTakeCommand(ctx, HgrAbility.Rope, grant: false), registerRaw: true,
-            help: "Take a player's ability to rope <nick|#userid>");
         AddCmd("giverope", ctx => HandleGiveTakeCommand(ctx, HgrAbility.Rope, grant: true), registerRaw: false,
-            help: "Bir oyuncuya Rope yetkisi verir: !giverope <isim>");
+            help: "Bir oyuncuya Rope yetkisi verir: sw_giverope <isim|#slot> / !giverope");
         AddCmd("takerope", ctx => HandleGiveTakeCommand(ctx, HgrAbility.Rope, grant: false), registerRaw: false,
-            help: "Bir oyuncunun Rope yetkisini alır: !takerope <isim>");
+            help: "Bir oyuncunun Rope yetkisini alır: sw_takerope <isim|#slot> / !takerope");
 
-        AddCmd("amx_give_hgr", ctx => HandleGiveTakeCommand(ctx, HgrAbility.All, grant: true), registerRaw: true,
-            help: "Give a player Hook, Grab and Rope <nick|#userid>");
-        AddCmd("amx_take_hgr", ctx => HandleGiveTakeCommand(ctx, HgrAbility.All, grant: false), registerRaw: true,
-            help: "Take a player's Hook, Grab and Rope <nick|#userid>");
-        AddCmd("hgrver", ctx => HandleGiveTakeCommand(ctx, HgrAbility.All, grant: true), registerRaw: false,
-            help: "Bir oyuncuya tüm HGR yetkilerini verir: !hgrver <isim>");
-        AddCmd("hgral", ctx => HandleGiveTakeCommand(ctx, HgrAbility.All, grant: false), registerRaw: false,
-            help: "Bir oyuncunun tüm HGR yetkilerini alır: !hgral <isim>");
+        AddCmd("givehgr", ctx => HandleGiveTakeCommand(ctx, HgrAbility.All, grant: true), registerRaw: false,
+            help: "Bir oyuncuya tüm HGR yetkilerini verir: sw_givehgr <isim|#slot> / !givehgr");
+        AddCmd("takehgr", ctx => HandleGiveTakeCommand(ctx, HgrAbility.All, grant: false), registerRaw: false,
+            help: "Bir oyuncunun tüm HGR yetkilerini alır: sw_takehgr <isim|#slot> / !takehgr");
 
-        // 4. Menü ve yönetim komutları (sw_hookmenu / !hookmenu)
+        // 6. Menü ve yönetim komutları (sw_hookmenu, sw_hgr, sw_hgrreload)
         AddCmd("hookmenu", OnMenuCommand, registerRaw: false,
             help: "HGR görsel yönetim menüsünü açar (sw_hookmenu / !hookmenu)");
         AddCmd("hgr", OnHgrCommand, registerRaw: false,
-            help: "HGR bilgi ve yönetim menüsünü açar (!hgr)");
+            help: "HGR bilgi ve yönetim menüsünü açar (sw_hgr / !hgr)");
         AddCmd("hgrreload", OnReloadCommand, registerRaw: false,
-            help: "HGR yapılandırma dosyasını yeniden yükler (!hgrreload)");
+            help: "HGR yapılandırma dosyasını yeniden yükler (sw_hgrreload / !hgrreload)");
     }
 
     private void AddCmd(string name, ICommandService.CommandListener handler, bool registerRaw, string help)
@@ -534,10 +512,10 @@ public sealed class Plugin(ISwiftlyCore core) : BasePlugin(core)
 
         string bindHint = ability switch
         {
-            HgrAbility.Hook => "alias +hook \"hook1\"; alias -hook \"hook0\"; bind <tuş> +hook",
-            HgrAbility.Grab => "alias +grab \"grab1\"; alias -grab \"grab0\"; bind <tuş> +grab",
-            HgrAbility.Rope => "alias +rope \"rope1\"; alias -rope \"rope0\"; bind <tuş> +rope",
-            _ => "hook1/hook0 | grab1/grab0 | rope1/rope0"
+            HgrAbility.Hook => "alias +hook \"sw_hook1\"; alias -hook \"sw_hook0\"; bind <tuş> +hook",
+            HgrAbility.Grab => "alias +grab \"sw_grab1\"; alias -grab \"sw_grab0\"; bind <tuş> +grab",
+            HgrAbility.Rope => "alias +rope \"sw_rope1\"; alias -rope \"sw_rope0\"; bind <tuş> +rope",
+            _ => "sw_hook1/sw_hook0 | sw_grab1/sw_grab0 | sw_rope1/sw_rope0"
         };
 
         bool alreadyHas = _permissions.HasGrantedAbility(target, ability);
@@ -617,7 +595,7 @@ public sealed class Plugin(ISwiftlyCore core) : BasePlugin(core)
         PlayerUtil.SendChat(player, _config.General.ChatPrefix,
             $"Yetkileriniz -> Hook: {(h ? "[lime]AÇIK" : "[red]KAPALI")}[default] | Grab: {(g ? "[lime]AÇIK" : "[red]KAPALI")}[default] | Rope: {(r ? "[lime]AÇIK" : "[red]KAPALI")}[default]");
         PlayerUtil.SendChat(player, _config.General.ChatPrefix,
-            "Komutlar: [yellow]hook1 / hook0[default] | [yellow]grab1 / grab0[default] | [yellow]rope1 / rope0[default] (Basılı tutma: [lime]alias +hook \"hook1\"; alias -hook \"hook0\"; bind <tuş> +hook[default])");
+            "Komutlar: [yellow]sw_hook1 / sw_hook0[default] | [yellow]sw_grab1 / sw_grab0[default] | [yellow]sw_rope1 / sw_rope0[default] (Basılı tutma: [lime]alias +hook \"sw_hook1\"; alias -hook \"sw_hook0\"; bind <tuş> +hook[default])");
     }
 
     private void OnReloadCommand(ICommandContext ctx)

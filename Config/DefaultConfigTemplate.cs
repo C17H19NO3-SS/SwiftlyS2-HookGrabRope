@@ -13,21 +13,22 @@ public static class DefaultConfigTemplate
         #
         # KULLANIM (Konsol Tuş Atamaları - Bind):
         #   CS2'de + ile başlayan özel komutlar istemci tarafından engellendiği için
-        #   komutlar hook1/hook0, grab1/grab0 ve rope1/rope0 olarak çalışır:
+        #   komutlar sw_hook1/sw_hook0, sw_grab1/sw_grab0 ve sw_rope1/sw_rope0 olarak çalışır:
         #
-        #   alias +hook "hook1"; alias -hook "hook0"; bind <tuş> +hook
-        #   alias +grab "grab1"; alias -grab "grab0"; bind <tuş> +grab
-        #   alias +rope "rope1"; alias -rope "rope0"; bind <tuş> +rope
+        #   alias +hook "sw_hook1"; alias -hook "sw_hook0"; bind <tuş> +hook
+        #   alias +grab "sw_grab1"; alias -grab "sw_grab0"; bind <tuş> +grab
+        #   alias +rope "sw_rope1"; alias -rope "sw_rope0"; bind <tuş> +rope
         #
         #   Alternatif Aç/Kapat Komutları:
-        #   hook_toggle (!hook) | grab_toggle (!grab) | rope_toggle (!rope)
+        #   sw_hook_toggle (!hook) | sw_grab_toggle (!grab) | sw_rope_toggle (!rope)
         #
         # ADMİN KOMUTLARI:
         #   sw_hookmenu / !hookmenu -> Görsel HGR Yönetim Menüsü
-        #   amx_give_hook <isim/#id> | amx_take_hook <isim/#id>  (!givehook / !takehook)
-        #   amx_give_grab <isim/#id> | amx_take_grab <isim/#id>  (!givegrab / !takegrab)
-        #   amx_give_rope <isim/#id> | amx_take_rope <isim/#id>  (!giverope / !takerope)
-        #   !hgrreload -> Yapılandırmayı yeniden yükler
+        #   sw_givehook <isim/#id> | sw_takehook <isim/#id>  (!givehook / !takehook)
+        #   sw_givegrab <isim/#id> | sw_takegrab <isim/#id>  (!givegrab / !takegrab)
+        #   sw_giverope <isim/#id> | sw_takerope <isim/#id>  (!giverope / !takerope)
+        #   sw_givehgr <isim/#id>  | sw_takehgr <isim/#id>   (!givehgr / !takehgr)
+        #   sw_hgrreload -> Yapılandırmayı yeniden yükler
         # ==============================================================================
 
         [general]
@@ -45,17 +46,17 @@ public static class DefaultConfigTemplate
         # Yönetim menüsü ve oyuncuya yetki verme/alma komutları için üst yetki:
         admin_manage_permission = "admin.hgr"
 
-        # true ise admin.hook yetkisine sahip olanlar da (amx_hook.sma'daki gibi) menü ve give/take komutlarını kullanabilir:
+        # true ise admin.hook yetkisine sahip olanlar da menü ve give/take komutlarını kullanabilir:
         allow_hook_admins_to_manage = true
 
         # true ise adminler başka bir admini Grab ile tutamaz veya yetkisini alamaz:
         admin_immunity = true
 
         [hook]
-        # true yapılırsa sunucudaki tüm oyuncular (yetkisizler dahil) +hook kullanabilir (hook_enabled cvar):
+        # true yapılırsa sunucudaki tüm oyuncular (yetkisizler dahil) hook kullanabilir (sw_hook_enabled cvar):
         enabled_for_all = false
 
-        # Hook hızı (amx_hook.sma varsayılanı: 5.0 -> 5.0 * 120 = 600 birim/sn):
+        # Hook hızı (sw_hook_speed varsayılanı: 5.0 -> 5.0 * 120 = 600 birim/sn):
         speed = 5.0
         max_distance = 8192.0
         arrival_stop_distance = 32.0
@@ -65,16 +66,16 @@ public static class DefaultConfigTemplate
         sound_event_name = "UI.ButtonRolloverLarge"
 
         [grab]
-        # true yapılırsa sunucudaki tüm oyuncular +grab kullanabilir (grab_enabled cvar):
+        # true yapılırsa sunucudaki tüm oyuncular grab kullanabilir (sw_grab_enabled cvar):
         enabled_for_all = false
 
-        # Grab çekim hızı (grab_speed cvar):
+        # Grab çekim hızı (sw_grab_speed cvar):
         speed = 5.0
         max_distance = 4096.0
         min_hold_distance = 75.0
         max_hold_distance = 2500.0
 
-        # Mouse1 (+push) ile ileri itme ve Mouse2 (+pull) ile kendine çekme adım hızı:
+        # Mouse1 / sw_push1 ile ileri itme ve Mouse2 / sw_pull1 ile kendine çekme adım hızı:
         push_pull_step = 16.0
 
         # Grab sırasında R tuşu ile hedefi baktığınız yöne fırlatma gücü:
@@ -88,10 +89,10 @@ public static class DefaultConfigTemplate
         show_center_hud = true
 
         [rope]
-        # true yapılırsa sunucudaki tüm oyuncular +rope kullanabilir (rope_enabled cvar):
+        # true yapılırsa sunucudaki tüm oyuncular rope kullanabilir (sw_rope_enabled cvar):
         enabled_for_all = false
 
-        # Rope sallanma ve gerilim hızı (rope_speed cvar):
+        # Rope sallanma ve gerilim hızı (sw_rope_speed cvar):
         speed = 5.0
         max_distance = 8192.0
         min_length = 60.0
